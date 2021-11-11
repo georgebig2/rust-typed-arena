@@ -108,7 +108,7 @@ struct ChunkList<T> {
     rest: Vec<Vec<T>>,
 }
 
-impl<T> Arena<T> {
+impl<'a,T> Arena<T> {
     /// Construct a new arena.
     ///
     /// ## Example
@@ -183,13 +183,13 @@ impl<T> Arena<T> {
     /// assert_eq!(*x, 42);
     /// ```
     #[inline]
-    pub fn alloc(&self, value: T) -> &mut T {
+    pub fn alloc(&self, value: T) -> &'a mut T {
         self.alloc_fast_path(value)
             .unwrap_or_else(|value| self.alloc_slow_path(value))
     }
 
     #[inline]
-    fn alloc_fast_path(&self, value: T) -> Result<&mut T, T> {
+    fn alloc_fast_path(&self, value: T) -> Result<&'a mut T, T> {
         let mut chunks = self.chunks.borrow_mut();
         let len = chunks.current.len();
         if len < chunks.current.capacity() {
@@ -203,7 +203,7 @@ impl<T> Arena<T> {
         }
     }
 
-    fn alloc_slow_path(&self, value: T) -> &mut T {
+    fn alloc_slow_path(&self, value: T) -> &'a mut T {
         &mut self.alloc_extend(iter::once(value))[0]
     }
 
@@ -219,7 +219,7 @@ impl<T> Arena<T> {
     /// let abc = arena.alloc_extend("abcdefg".chars().take(3));
     /// assert_eq!(abc, ['a', 'b', 'c']);
     /// ```
-    pub fn alloc_extend<I>(&self, iterable: I) -> &mut [T]
+    pub fn alloc_extend<I>(&self, iterable: I) -> &'a mut [T]
     where
         I: IntoIterator<Item = T>,
     {
