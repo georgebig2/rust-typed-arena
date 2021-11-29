@@ -510,6 +510,15 @@ impl<'a,T> Arena<T> {
             state: position,
         }
     }
+    ///
+    pub fn clear(&mut self) {
+        let chunks = self.chunks.get_mut();
+        chunks.current.clear();
+        /*for mut vec in chunks.rest {
+            vec.clear();
+        }*/
+        chunks.rest.clear();
+    }
 }
 
 impl Arena<u8> {
